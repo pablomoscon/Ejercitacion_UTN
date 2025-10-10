@@ -36,7 +36,7 @@ struct Factura
     int clienteId;
     int nItems;
     Item items[10];
-    float totalVentas;
+    float totalVentas = 0;
 };
 
 void ingresarClientes(Cliente clientes[], int &id, int &nClientes)
@@ -62,6 +62,16 @@ void ingresarClientes(Cliente clientes[], int &id, int &nClientes)
     nClientes += n;
 }
 
+float calcularTotalVentas(Factura factura)
+{
+    float total = 0;
+    for (int j = 0; j < factura.nItems; j++)
+    {
+        total += factura.items[j].producto.precio * factura.items[j].cantidad;
+    }
+    return total;
+}
+
 void ingresarFactura(Factura facturas[], Cliente clientes[], Producto productos[], Item items[], int &nFactura)
 {
     int n;
@@ -70,10 +80,10 @@ void ingresarFactura(Factura facturas[], Cliente clientes[], Producto productos[
 
     for (int i = nFactura; i < nFactura + n; i++)
     {
-        facturas[i].numero += nFactura;
+        facturas[i].numero = i + 1;
 
         cout << "Fecha de la factura " << endl
-        << "Ingrese el día: " << endl;
+             << "Ingrese el día: " << endl;
         cin >> facturas[i].fecha.dia;
         cout << "Ingrese el mes: " << endl;
         cin >> facturas[i].fecha.mes;
@@ -112,29 +122,18 @@ void ingresarFactura(Factura facturas[], Cliente clientes[], Producto productos[
             cout << "Ingrese la cantidad: ";
             cin >> facturas[i].items[j].cantidad;
         }
+
+        facturas[i].totalVentas = calcularTotalVentas(facturas[i]);
     }
+    nFactura += n;
 }
 
-// void totalVentas(Factura facturas[],) {
-//     for (int i = 0; i < nFacturas; i++)
-//     {
-//         if (facturas[i].fecha.dia == sesionCaja.dia && facturas[i].fecha.mes == sesionCaja.mes && facturas[i].fecha.anio == sesionCaja.anio)
-//         {
-//             for (int j = 0; j < facturas[i].nItems; j++)
-//             {
-//                 totalVentasFactura += facturas[i].items[j].producto.precio * facturas[i].items[j].cantidad;
-//                 totalVentasSesion += totalVentasFactura;
-//             }
-//         }
-//     }
-// }
 
 void cerrarCaja(Factura facturas[], int nFacturas)
 {
 
     Fecha sesionCaja;
     float ventasPorFactura = 0;
-    float totalVentasFactura = 0;
     float totalVentasSesion = 0;
     float maxImporte = 0;
 
@@ -150,13 +149,16 @@ void cerrarCaja(Factura facturas[], int nFacturas)
     {
         if (facturas[i].fecha.dia == sesionCaja.dia && facturas[i].fecha.mes == sesionCaja.mes && facturas[i].fecha.anio == sesionCaja.anio)
         {
-       
+            if (maxImporte < facturas[i].totalVentas)
+            {
+                maxImporte = facturas[i].totalVentas;
+            }
 
-         
+            totalVentasSesion += facturas[i].totalVentas;
         }
     }
-
-    cout << "total ventas de la sesion de día " << sesionCaja.dia << "/" << sesionCaja.mes << "/" << sesionCaja.anio << " es : " << totalVentasSesion << endl;
+    cout << "La máxima factura del día es: " << maxImporte << endl;
+    cout << "total ventas del día: " << sesionCaja.dia << "/" << sesionCaja.mes << "/" << sesionCaja.anio << " es : " << totalVentasSesion << endl;
 }
 
 int main()
@@ -206,6 +208,7 @@ int main()
 
         case 3:
             cerrarCaja(facturas, nFacturas);
+            break;
 
         default:
             cout << "Opción no válida. Intente nuevamente.\n";
@@ -215,7 +218,7 @@ int main()
         cout << "\n=========================\n";
         cout << "1. Ingresar clientes\n";
         cout << "2. Ingresar facturas\n";
-        cout << "3. Cerrar caje\n";
+        cout << "3. Cerrar caja\n";
         cout << "0. Salir\n";
         cout << "=========================\n";
         cout << "Ingrese una opción: ";
